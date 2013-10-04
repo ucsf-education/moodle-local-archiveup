@@ -37,26 +37,51 @@ function local_archiveup_cron() {
     if ($random100 < 20) {     // Approximately 20% of the time.
         mtrace(" ArchiveUp: Running archive tasks...");
 
+        $dbman = $DB->get_manager();
         $timenow  = time();
-        mtrace(" ArchiveUp current time: ".date('r',$timenow)."\n\n");
+        mtrace(" ArchiveUp current time: ".date('r',$timenow));
 
+        // c.f. Delete old logs in lib/cronlib.php
         $loglifetime = get_config('local_archiveup', 'loglifetime');
         if (!empty($loglifetime)) {  // value in days
 
             $loglifetime = $timenow - ($loglifetime * 3600 * 24);
 
-            $dbman = $DB->get_manager();
             $archivetablename = "log_archiveup";
-
             if ($dbman->table_exists($archivetablename)) {
-                mtrace(" Looking for old logs...");
+                mtrace("  Looking for old logs...");
                 $totalrecords = $DB->count_records_select("log", "time < ?", array($loglifetime));
 
                 if ($totalrecords > 0) {
+                    $transaction = $DB->start_delegated_transaction();
                     $DB->execute("INSERT INTO {{$archivetablename}} SELECT * FROM {log} WHERE time < ?", array($loglifetime));
                     $DB->delete_records_select("log", "time < ?", array($loglifetime));
-                } 
+                    $transaction->allow_commit();
+                }
                 mtrace("  archived $totalrecords old log record(s).");
+            }
+        }
+
+        // c.f. grade_cron() in lib/gradelib.php
+        $gradehistorylifetime = get_config('local_archiveup', 'gradehistorylifetime');
+        if (!empty($gradehistorylifetime)) {
+            $histlifetime = $timenow - ($gradehistorylifetime * 3600 * 24);
+            $tables = array('grade_outcomes_history', 'grade_categories_history', 'grade_items_history', 'grade_grades_history', 'scale_history');
+            foreach ($tables as $table) {
+                $archivetable = $table . '_au';
+                if ($dbman->table_exists($archivetable)) {
+                    mtrace("  Looking for old grade history records in '$table'...");
+                    $totalrecords = $DB->count_records_select($table, "timemodified < ?", array($histlifetime));
+                    if ($totalrecords > 0) {
+                        $transaction = $DB->start_delegated_transaction();
+                        $DB->execute("INSERT INTO {{$archivetable}} SELECT * FROM {{$table}} WHERE timemodified < ?", array($histlifetime));
+                        $DB->delete_records_select($table, "timemodified < ?", array($histlifetime));
+                        $transaction->allow_commit();
+                        mtrace("  Moved $totalrecords old grade history record(s) in '$table' to '$archivetable'.");
+                    } else {
+                        mtrace("  nothing to archive.");
+                    }
+                }
             }
         }
 

@@ -22,3 +22,6 @@ $string['loglifetime'] = 'Archive logs older than';
 $string['configloglifetime'] = 'This specifies the length of time you want to keep logs about user activity. Logs that are older than this age are automatically archived to a different table. It is best to keep logs as long as possible, in case you need them, but if you have a very busy server and are experiencing performance problems, then you may want to lower the log lifetime. Values lower than 30 are not recommended because statistics may not work properly.';
 $string['neverarchivelogs'] = 'Never archive logs';
 $string['loglifetimewarning'] = '<strong>Cleanup logs</strong> is currently set to <em>{$a} days</em>.  To prevent loss of important log data, please visit the <a href="settings.php?section=cleanup">cleanup setting page</a> and set "<strong>Keep logs for</strong>" to <em>Never delete logs</em>.';
+$string['gradehistorylifetime'] = 'Archive grade history older than';
+$string['neverarchivehistory'] = 'Never archive history';
+$string['gradehistorylifetimewarning'] = '<strong>Cleanup grade history</strong> is currently set to "<em>{$a} days</em>".  To prevent loss of important grade history data, please visit the <a href="settings.php?section=cleanup">cleanup setting page</a> and set "<strong>Grade history lifetime</strong>" to "<em>Never delete history</em>".';

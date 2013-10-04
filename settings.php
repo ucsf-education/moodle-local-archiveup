@@ -38,7 +38,7 @@ if ($hassiteconfig) { // speedup for non-admins, add all caps used on this page
     }
 
     $page->add(new admin_setting_configselect('local_archiveup/loglifetime', new lang_string('loglifetime', 'local_archiveup'),
-                                              $warning . new lang_string('configloglifetime', 'local_archiveup'), 0, 
+                                              $warning . new lang_string('configloglifetime', 'local_archiveup'), 0,
                                               array(0 => new lang_string('neverarchivelogs', 'local_archiveup'),
                                                     1000 => new lang_string('numdays', '', 1000),
                                                     365 => new lang_string('numdays', '', 365),
@@ -51,6 +51,21 @@ if ($hassiteconfig) { // speedup for non-admins, add all caps used on this page
                                                     10 => new lang_string('numdays', '', 10),
                                                     5 => new lang_string('numdays', '', 5),
                                                     2 => new lang_string('numdays', '', 2))));
+    $gradehistorywarning = '';
+    if (!empty($CFG->gradehistorylifetime)) {
+        $warning = '<div class="form-warning">' . new lang_string('gradehistorylifetimewarning', 'local_archiveup', $CFG->gradehistorylifetime) . '</div>';
+    }
+
+    $page->add(new admin_setting_configselect('local_archiveup/gradehistorylifetime', new lang_string('gradehistorylifetime', 'local_archiveup'),
+                                              $warning . new lang_string('gradehistorylifetime_help', 'grades'), 0, array(0 => new lang_string('neverarchivehistory', 'local_archiveup'),
+                                                                                                               1000 => new lang_string('numdays', '', 1000),
+                                                                                                               365 => new lang_string('numdays', '', 365),
+                                                                                                               180 => new lang_string('numdays', '', 180),
+                                                                                                               150 => new lang_string('numdays', '', 150),
+                                                                                                               120 => new lang_string('numdays', '', 120),
+                                                                                                               90 => new lang_string('numdays', '', 90),
+                                                                                                               60 => new lang_string('numdays', '', 60),
+                                                                                                               30 => new lang_string('numdays', '', 30))));
 
     // Add settings page to navigation tree
     $ADMIN->add('localplugins', $page);
