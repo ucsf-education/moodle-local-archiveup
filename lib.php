@@ -46,19 +46,56 @@ function local_archiveup_cron() {
         if (!empty($loglifetime)) {  // value in days
 
             $loglifetime = $timenow - ($loglifetime * 3600 * 24);
+            $lifetimep = array($loglifetime);
 
             $archivetablename = "log_archiveup";
             if ($dbman->table_exists($archivetablename)) {
-                mtrace("  Looking for old logs...");
-                $totalrecords = $DB->count_records_select("log", "time < ?", array($loglifetime));
+                mtrace("  Looking for old record(s) in legacy log table...");
 
-                if ($totalrecords > 0) {
+                $start = time();
+                $totalrecords = 0;
+                while ($min = $DB->get_field_select("log", "MIN(time)", "time < ?", $lifetimep)) {
+                    // Break this down into chunks to avoid transaction for too long and generally thrashing database.
+                    // Experiments suggest deleting one day takes up to a few seconds; probably a reasonable chunk size usually.
+                    // If the cleanup has just been enabled, it might take e.g a month to clean the years of logs.
+                    $params = array(min($min + 3600 * 24, $loglifetime));
+                    $totalrecords += $DB->count_records_select("log", "time < ?", $params);
+
                     $transaction = $DB->start_delegated_transaction();
-                    $DB->execute("INSERT INTO {{$archivetablename}} SELECT * FROM {log} WHERE time < ?", array($loglifetime));
-                    $DB->delete_records_select("log", "time < ?", array($loglifetime));
+                    $DB->execute("INSERT INTO {{$archivetablename}} SELECT * FROM {log} WHERE time < ?", $params);
+                    $DB->delete_records_select("log", "time < ?", $params);
                     $transaction->allow_commit();
+                    if (time() > $start + 300) {
+                        // Do not churn on log deletion for too long each run.
+                        break;
+                    }
                 }
-                mtrace("  archived $totalrecords old log record(s).");
+                mtrace("  archived $totalrecords old record(s) from legacy log table.");
+            }
+
+            $archivetablename = "logstore_standard_log_au";
+            if ($dbman->table_exists($archivetablename)) {
+                mtrace("  Looking for old record(s) in standard logstore...");
+
+                $start = time();
+                $totalrecords = 0;
+                while ($min = $DB->get_field_select("logstore_standard_log", "MIN(timecreated)", "timecreated < ?", $lifetimep)) {
+                    // Break this down into chunks to avoid transaction for too long and generally thrashing database.
+                    // Experiments suggest deleting one day takes up to a few seconds; probably a reasonable chunk size usually.
+                    // If the cleanup has just been enabled, it might take e.g a month to clean the years of logs.
+                    $params = array(min($min + 3600 * 24, $loglifetime));
+                    $totalrecords += $DB->count_records_select("logstore_standard_log", "timecreated < ?", $params);
+
+                    $transaction = $DB->start_delegated_transaction();
+                    $DB->execute("INSERT INTO {{$archivetablename}} SELECT * FROM {logstore_standard_log} WHERE timecreated < ?", $params);
+                    $DB->delete_records_select("logstore_standard_log", "timecreated < ?", $params);
+                    $transaction->allow_commit();
+                    if (time() > $start + 300) {
+                        // Do not churn on log deletion for too long each run.
+                        break;
+                    }
+                }
+                mtrace("  archived $totalrecords old record(s) from standard logstore.");
             }
         }
 
