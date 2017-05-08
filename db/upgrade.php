@@ -235,5 +235,20 @@ function xmldb_local_archiveup_upgrade($oldversion) {
         // Standard savepoint reached.
         upgrade_plugin_savepoint(true, 2015100400, 'local', 'archiveup');
     }
+
+    if ($oldversion < 2017050800.00) {
+
+        // This could take a long time. Unfortunately, no way to know how long, and no way to do progress, so setting for 1 hour.
+        upgrade_set_timeout(3600);
+        // Define key contextid (foreign) to be added to logstore_standard_log.
+        $table = new xmldb_table('logstore_standard_log_au');
+        $key = new xmldb_key('contextid', XMLDB_KEY_FOREIGN, array('contextid'), 'context', array('id'));
+        // Launch add key contextid.
+        $dbman->add_key($table, $key);
+
+        // Standard savepoint reached.
+        upgrade_plugin_savepoint(true, 2017050800.00, 'local', 'archiveup');
+    }
+
     return true;
 }
