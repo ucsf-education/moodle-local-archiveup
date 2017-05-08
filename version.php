@@ -25,9 +25,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2015100400;
-$plugin->requires = 2014050800;
+$plugin->version = 2017050800;
+$plugin->requires = 2016112900;
 $plugin->cron = 1;
 $plugin->component = 'local_archiveup';
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.1 (Build: 2015100400)';
+$plugin->maturity = MATURITY_BETA;
+$plugin->release = '0.9.0';

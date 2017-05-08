@@ -51,6 +51,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="contextid" TYPE="foreign" FIELDS="contextid" REFTABLE="context" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
@@ -142,14 +143,16 @@
         <FIELD NAME="gradepass" TYPE="number" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="5" COMMENT="What grade is needed to pass? grademin &amp;lt; gradepass &amp;lt;= grademax" PREVIOUS="outcomeid" NEXT="multfactor"/>
         <FIELD NAME="multfactor" TYPE="number" LENGTH="10" NOTNULL="true" DEFAULT="1.0" SEQUENCE="false" DECIMALS="5" COMMENT="Multiply all grades by this" PREVIOUS="gradepass" NEXT="plusfactor"/>
         <FIELD NAME="plusfactor" TYPE="number" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="5" COMMENT="Add this to all grades" PREVIOUS="multfactor" NEXT="aggregationcoef"/>
-        <FIELD NAME="aggregationcoef" TYPE="number" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="5" COMMENT="Aggregation coefficient used for category weights or other aggregation types" PREVIOUS="plusfactor" NEXT="sortorder"/>
+        <FIELD NAME="aggregationcoef" TYPE="number" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="5" COMMENT="Aggregation coefficient used for category weights or other aggregation types" PREVIOUS="plusfactor" NEXT="aggregationcoef2"/>
+        <FIELD NAME="aggregationcoef2" TYPE="number" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="5" COMMENT="Aggregation coefficient used for category weights or other aggregation types" PREVIOUS="aggregationcoef2" NEXT="sortorder"/>
         <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Sorting order of the columns" PREVIOUS="aggregationcoef" NEXT="hidden"/>
         <FIELD NAME="hidden" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 is hidden, &amp;gt; 1 is a date to hide until (prevents viewing)" PREVIOUS="sortorder" NEXT="locked"/>
         <FIELD NAME="locked" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 is locked, &amp;gt; 1 is a date to lock until (prevents update)" PREVIOUS="hidden" NEXT="locktime"/>
         <FIELD NAME="locktime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="lock all final grades after this date" PREVIOUS="locked" NEXT="needsupdate"/>
         <FIELD NAME="needsupdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If this flag is set, then the whole column will be recalculated" PREVIOUS="locktime" NEXT="display"/>
         <FIELD NAME="display" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="needsupdate" NEXT="decimals"/>
-        <FIELD NAME="decimals" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" PREVIOUS="display"/>
+        <FIELD NAME="decimals" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" PREVIOUS="display" NEXT="weightoverride"/>
+        <FIELD NAME="weightoverride" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="decimals"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="oldid"/>

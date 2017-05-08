@@ -235,5 +235,43 @@ function xmldb_local_archiveup_upgrade($oldversion) {
         // Standard savepoint reached.
         upgrade_plugin_savepoint(true, 2015100400, 'local', 'archiveup');
     }
+
+    if ($oldversion < 2017050800.00) {
+        // This could take a long time. Unfortunately, no way to know how long, and no way to do progress, so setting for 1 hour.
+        upgrade_set_timeout(3600);
+        // Define key contextid (foreign) to be added to logstore_standard_log_au.
+        $table = new xmldb_table('logstore_standard_log_au');
+        $key = new xmldb_key('contextid', XMLDB_KEY_FOREIGN, array('contextid'), 'context', array('id'));
+        // Launch add key contextid.
+        $dbman->add_key($table, $key);
+
+        // Standard savepoint reached.
+        upgrade_plugin_savepoint(true, 2017050800.00, 'local', 'archiveup');
+    }
+
+    if ($oldversion < 2017050800.01) {
+        // Define field aggregationcoef2 to be added to grade_items_history_au.
+        $table = new xmldb_table('grade_items_history_au');
+        $field = new xmldb_field('aggregationcoef2', XMLDB_TYPE_NUMBER, '10, 5', null, XMLDB_NOTNULL, null, '0', 'aggregationcoef');
+        // Conditionally launch add field aggregationcoef2.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Standard savepoint reached.
+        upgrade_plugin_savepoint(true, 2017050800.01, 'local', 'archiveup');
+    }
+
+    if ($oldversion < 2017050800.02) {
+        // Define field weightoverride to be added to grade_items_history_au.
+        $table = new xmldb_table('grade_items_history_au');
+        $field = new xmldb_field('weightoverride', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'decimals');
+        // Conditionally launch add field weightoverride.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Standard savepoint reached.
+        upgrade_plugin_savepoint(true, 2017050800.02, 'local', 'archiveup');
+    }
+
     return true;
 }
